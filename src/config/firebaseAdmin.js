@@ -15,20 +15,13 @@ try {
     const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);
   } 
-  // Otherwise, use the single JSON environment variable in production (Render)
-  else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    
-    // Sanitize the private key to fix any newline or carriage return issues for OpenSSL 3
-    if (serviceAccount.private_key) {
-      serviceAccount.private_key = serviceAccount.private_key
-        .replace(/\\n/g, '\n')
-        .replace(/\r/g, '');
-    }
-
+  // Otherwise, decode the Base64 environment variable on Render (Production)
+  else if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    const jsonString = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+    const serviceAccount = JSON.parse(jsonString);
     credential = admin.credential.cert(serviceAccount);
   } else {
-    throw new Error('No Firebase credentials found (missing serviceAccountKey.json or FIREBASE_SERVICE_ACCOUNT_JSON)');
+    throw new Error('No Firebase credentials found (missing serviceAccountKey.json or FIREBASE_SERVICE_ACCOUNT_BASE64)');
   }
 } catch (error) {
   console.error('Firebase credential loading error:', error);
