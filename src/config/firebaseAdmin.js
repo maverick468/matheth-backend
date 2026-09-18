@@ -10,13 +10,22 @@ try {
   const __dirname = path.dirname(__filename);
   const keyPath = path.join(__dirname, '../serviceAccountKey.json');
 
+  // Local development fallback
   if (fs.existsSync(keyPath)) {
     const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);
-  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
-    const jsonString = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
-    const serviceAccount = JSON.parse(jsonString);
-    credential = admin.credential.cert(serviceAccount);
+  } 
+  // Production on Render using individual variables
+  else if (process.env.FIREBASE_PRIVATE_KEY) {
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    // Handle escaped newlines if Render passes them literally
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
+    credential = admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: privateKey,
+    });
   } else {
     throw new Error('No Firebase credentials found');
   }
