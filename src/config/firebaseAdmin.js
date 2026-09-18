@@ -16,10 +16,18 @@ try {
     credential = admin.credential.cert(serviceAccount);
   } else {
     // Otherwise, use environment variables (production / Render)
+    let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
+    
+    // Remove accidental surrounding quotes if present
+    rawKey = rawKey.replace(/^["']|["']$/g, '');
+    
+    // Convert literal \n text to real newlines and strip carriage returns
+    const formattedKey = rawKey.replace(/\\n/g, '\n').replace(/\r/g, '');
+
     credential = admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      privateKey: formattedKey,
     });
   }
 } catch (error) {
