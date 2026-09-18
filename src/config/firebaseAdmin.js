@@ -18,6 +18,14 @@ try {
   // Otherwise, use the single JSON environment variable in production (Render)
   else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    
+    // Sanitize the private key to fix any newline or carriage return issues for OpenSSL 3
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key
+        .replace(/\\n/g, '\n')
+        .replace(/\r/g, '');
+    }
+
     credential = admin.credential.cert(serviceAccount);
   } else {
     throw new Error('No Firebase credentials found (missing serviceAccountKey.json or FIREBASE_SERVICE_ACCOUNT_JSON)');
