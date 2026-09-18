@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
-import admin from 'firebase-admin';
+import admin from './config/firebaseAdmin.js'; // Imports pre-initialized admin from serviceAccount.js
 import { GoogleGenAI, Type } from '@google/genai';
 
 // Import modular routers
@@ -31,17 +31,6 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Initialize Google Gen AI SDK
 const ai = new GoogleGenAI();
-
-// Initialize Firebase Admin SDK
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
 
 const app = express();
 app.use(cors());
@@ -117,8 +106,7 @@ app.use('/api/admin', adminRoutes);
 
 // AI Question Generation Endpoint with Automatic Model Quota Failover
 app.post('/api/generate-quiz', upload.single('file'), async (req, res) => {
-  // Use current active models with separate free-tier quota pools
-  const fallbackModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
+  const fallbackModels = ['gemini-2.5-flash', 'gemini-1.5-flash'];
   let currentModelIndex = 0;
   let success = false;
   let finalResult = null;
@@ -150,7 +138,6 @@ app.post('/api/generate-quiz', upload.single('file'), async (req, res) => {
     contents.push(`Additional Source Text/Content:\n${sourceText.trim()}`);
   }
 
-  // Loop through fallback models until one succeeds or all fail
   while (currentModelIndex < fallbackModels.length && !success) {
     const activeModel = fallbackModels[currentModelIndex];
     let attempt = 0;
@@ -208,7 +195,7 @@ app.post('/api/generate-quiz', upload.single('file'), async (req, res) => {
 
         if (isQuotaExceeded || isUnavailable) {
           console.log(`[Failover] Switching to next model from list...`);
-          break; // Break inner retry loop to immediately try the next model
+          break; 
         }
 
         if (attempt < maxRetries) {
