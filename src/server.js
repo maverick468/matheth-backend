@@ -58,6 +58,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Root API Endpoint (Prevents HTML 404 responses on base /api requests)
+app.get('/api', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Matheth Backend API is running successfully!',
+    endpoints: ['/api/health', '/api/debug-status', '/api/auth', '/api/games', '/api/questions', '/api/ai'] 
+  });
+});
+
 // Health Check Route
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'active', service: 'Matheth Backend API' });
