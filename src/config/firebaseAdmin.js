@@ -1,10 +1,8 @@
 import admin from 'firebase-admin';
 
-const serviceAccount = {
-  type: "service_account",
-  project_id: "matheth-dfdc4",
-  private_key_id: "2d1e311ffb6f3dd22b00b08eb5a4506469af67e4",
-  private_key: `-----BEGIN PRIVATE KEY-----
+// Normalize line endings at runtime to strip any Windows CRLF (\r\n) 
+// introduced by Git, ensuring pure LF (\n) required by Node 24 / OpenSSL 3.
+const rawPrivateKey = `-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCYo517foGJjITU
 eu1P7035x+x3MWe1XBoW9KcR2peVNiQ+78/kat+nJ7CwAw6M1dOQDPi49embGCjm
 LSFvAVSRda4nVtciL79QZGRFUx/GCupmpnn84InxDBRwl0Z4IT2l8hU/8ai5qIuz
@@ -31,7 +29,13 @@ ttEDNFGU8Ls4DYZEk1t690knKGrfTxHdIfRueIECgYAc2mRelw1sRJvz+qJOrplg
 FrrwL9PKHQzpnCjzPw82qqkDdQuR9MgGyLPDKCn/ErQmT4bl5GvzhKzxQVyLR75V
 bQ/rOrsirwC7Wl4xpuFPLEXVZXXBJbHngFK7kPUvC9g43O56wfXf5nBf2h7tzOHi
 pk7PoswVoi+GnXwfigamJg==
------END PRIVATE KEY-----`,
+-----END PRIVATE KEY-----`.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+const serviceAccount = {
+  type: "service_account",
+  project_id: "matheth-dfdc4",
+  private_key_id: "2d1e311ffb6f3dd22b00b08eb5a4506469af67e4",
+  private_key: rawPrivateKey,
   client_email: "firebase-adminsdk-fbsvc@matheth-dfdc4.iam.gserviceaccount.com",
   client_id: "114545170232103753501",
   auth_uri: "https://accounts.google.com/o/oauth2/auth",
