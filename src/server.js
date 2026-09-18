@@ -58,6 +58,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Server Root Endpoint (Prevents 404s when visiting the bare Render URL)
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Matheth Backend API is online!',
+    documentation: 'Use /api or /api/health for available endpoints.' 
+  });
+});
+
 // Root API Endpoint (Prevents HTML 404 responses on base /api requests)
 app.get('/api', (req, res) => {
   res.status(200).json({ 
