@@ -19,6 +19,15 @@ import badgeRoutes from './routes/badge.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 
 dotenv.config();
+process.on('uncaughtException', (err) => {
+  console.error('FATAL UNCAUGHT EXCEPTION:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('FATAL UNHANDLED REJECTION:', reason);
+  process.exit(1);
+});
 
 // Initialize Google Gen AI SDK
 const ai = new GoogleGenAI();
