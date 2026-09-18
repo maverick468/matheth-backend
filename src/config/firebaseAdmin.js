@@ -10,18 +10,15 @@ try {
   const __dirname = path.dirname(__filename);
   const keyPath = path.join(__dirname, '../serviceAccountKey.json');
 
-  // If the local file exists (development), use it
   if (fs.existsSync(keyPath)) {
     const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);
-  } 
-  // Otherwise, decode the Base64 environment variable on Render (Production)
-  else if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
     const jsonString = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
     const serviceAccount = JSON.parse(jsonString);
     credential = admin.credential.cert(serviceAccount);
   } else {
-    throw new Error('No Firebase credentials found (missing serviceAccountKey.json or FIREBASE_SERVICE_ACCOUNT_BASE64)');
+    throw new Error('No Firebase credentials found');
   }
 } catch (error) {
   console.error('Firebase credential loading error:', error);
