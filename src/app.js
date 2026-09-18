@@ -24,12 +24,33 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
 
-// Root Endpoint (Fixes the 404 error on your bare Render domain)
+// Root Endpoint (Fixes 404 on bare Render domain)
 app.get('/', (req, res) => {
   res.status(200).json({ 
     success: true, 
     message: 'Matheth Backend API is online!',
     documentation: 'Use /health or /api/v1/... for available endpoints.' 
+  });
+});
+
+// Base API Endpoint (Fixes 404 on /api requests)
+app.get('/api', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Matheth Backend API Base',
+    endpoints: {
+      auth: '/api/v1/auth',
+      games: '/api/v1/games',
+      questions: '/api/v1/questions',
+      ai: '/api/v1/ai',
+      groq: '/api/v1/groq',
+      upload: '/api/v1/upload',
+      leaderboard: '/api/v1/leaderboard',
+      referrals: '/api/v1/referrals',
+      badges: '/api/v1/badges',
+      admin: '/api/v1/admin',
+      health: '/health'
+    }
   });
 });
 
