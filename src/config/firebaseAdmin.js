@@ -10,16 +10,14 @@ try {
   const __dirname = path.dirname(__filename);
   const keyPath = path.join(__dirname, '../serviceAccountKey.json');
 
-  // 1. Local development (reads local file if it exists)
   if (fs.existsSync(keyPath)) {
     const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);
-  } 
-  // 2. Production on Render (reads individual secure variables)
-  else if (process.env.FIREBASE_PRIVATE_KEY) {
+  } else if (process.env.FIREBASE_PRIVATE_KEY) {
     let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    // Fix escaped newlines if Render passes them literally
-    privateKey = privateKey.replace(/\\n/g, '\n');
+    
+    // Explicitly convert literal \n strings to real newlines and strip carriage returns
+    privateKey = privateKey.replace(/\\n/g, '\n').replace(/\r/g, '');
 
     credential = admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
