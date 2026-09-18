@@ -10,15 +10,15 @@ try {
   const __dirname = path.dirname(__filename);
   const keyPath = path.join(__dirname, '../serviceAccountKey.json');
 
-  // Local development fallback
+  // 1. Local development (reads local file if it exists)
   if (fs.existsSync(keyPath)) {
     const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);
   } 
-  // Production on Render using individual variables
+  // 2. Production on Render (reads individual secure variables)
   else if (process.env.FIREBASE_PRIVATE_KEY) {
     let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    // Handle escaped newlines if Render passes them literally
+    // Fix escaped newlines if Render passes them literally
     privateKey = privateKey.replace(/\\n/g, '\n');
 
     credential = admin.credential.cert({
