@@ -1,11 +1,13 @@
 import admin from 'firebase-admin';
 import { serviceAccount } from './serviceAccount.js';
 
-// Normalize the private key to fix OpenSSL 3 / Node 24 line-ending issues
+// Sanitize the private key to remove any editor indentation or line-ending mismatches
 if (serviceAccount && serviceAccount.private_key) {
   serviceAccount.private_key = serviceAccount.private_key
-    .replace(/\\n/g, '\n')    // Handle literal backslash-n if copied that way
-    .replace(/\r\n/g, '\n');  // Strip Windows CRLF carriage returns
+    .replace(/\\n/g, '\n') // Handle literal escaped newlines if present
+    .split('\n')
+    .map(line => line.trim()) // Strip accidental leading/trailing spaces from auto-indentation
+    .join('\n');
 }
 
 try {
